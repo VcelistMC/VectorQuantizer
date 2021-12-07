@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-class Vector {
+class ImageVector {
     private ArrayList<ArrayList<Integer>> _vectorData;
     private int _size;
     
@@ -8,7 +8,7 @@ class Vector {
     private int currRow = 0;
     private int currCol = 0;
 
-    public Vector(int size){
+    public ImageVector(int size){
         _size = size;
         _vectorData = new ArrayList<>();
         for(int i = 0; i < size; i++){
@@ -19,7 +19,7 @@ class Vector {
         }
     }
 
-    public Vector(ArrayList<ArrayList<Integer>> vectorData){
+    public ImageVector(ArrayList<ArrayList<Integer>> vectorData){
         _size = vectorData.size();
         _vectorData = vectorData;
     }
@@ -41,10 +41,10 @@ class Vector {
 
     }
 
-    public ArrayList<Vector> split(){
-        ArrayList<Vector> splittedVectors = new ArrayList<>();
-        Vector vec1 = new Vector(_size);
-        Vector vec2 = new Vector(_size);
+    public ArrayList<ImageVector> split(){
+        ArrayList<ImageVector> splittedVectors = new ArrayList<>();
+        ImageVector vec1 = new ImageVector(_size);
+        ImageVector vec2 = new ImageVector(_size);
         int currCol = 0, currRow = 0;
         
         while (true) {
@@ -68,7 +68,7 @@ class Vector {
     }
 
 
-    public double getEuclideanDistanceTo(Vector that){
+    public double getEuclideanDistanceTo(ImageVector that){
         double distance = 0.0;
         int currCol = 0, currRow = 0;
         double sum = 0;
@@ -105,7 +105,7 @@ class Vector {
     }
 
     public static void main(String[] args) {
-        Vector vec = new Vector(2);
+        ImageVector vec = new ImageVector(2);
         vec.setPixel(1, 1, 231);
     }
 }

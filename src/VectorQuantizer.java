@@ -1,10 +1,12 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Vector;
 
 public class VectorQuantizer {
     private int _vectorSize;
     private int _codeBookSize;
-    private ArrayList<ArrayList<Vector>> _imageAsVectors;
+    private ArrayList<ArrayList<ImageVector>> _imageAsVectors;
 
     VectorQuantizer(int vectorSize, int codeBookSize){
         _vectorSize = vectorSize;
@@ -17,10 +19,10 @@ public class VectorQuantizer {
         int length = imageData.get(0).size();
 
         for(int row = 0; row < width; row += _vectorSize){
-            ArrayList<Vector> currVectorsRow = new ArrayList<>();
+            ArrayList<ImageVector> currVectorsRow = new ArrayList<>();
 
             for(int col = 0; col < length; col += _vectorSize){
-                Vector newVector = new Vector(_vectorSize);
+                ImageVector newVector = new ImageVector(_vectorSize);
                 int currRowIndex = row;
                 int currColIndex = col;
 
@@ -54,8 +56,32 @@ public class VectorQuantizer {
 
     public void compress(ArrayList<ArrayList<Integer>> imageData){
         _convertImageDataToVectors(imageData);
-
     }
+
+    public ImageVector vectorAverage1D(ArrayList<ImageVector> imageVectors){
+        ImageVector averageVector = new ImageVector(_vectorSize);
+        for (int row = 0; row < _vectorSize; row++){
+            for (int col = 0; col < _vectorSize; col++){
+                int sum = 0;
+                for (ImageVector imageVector : imageVectors){
+                    sum += imageVector.getPixel(row, col);
+                }
+                averageVector.add(sum / imageVectors.size());
+            }
+        }
+        return averageVector;
+    }
+
+    public ImageVector vectorAverage(ArrayList<ArrayList<ImageVector>> imageVectors){
+        ArrayList<ImageVector> vectors = new ArrayList<>();
+        for (int row = 0; row < imageVectors.size(); row++){
+            for (int col = 0; col < imageVectors.size(); col++){
+                vectors.add(imageVectors.get(row).get(col));
+            }
+        }
+        return vectorAverage1D(vectors);
+    }
+
     public static void main(String[] args) {
         ArrayList<ArrayList<Integer>> data = new ArrayList<ArrayList<Integer>>(
             Arrays.asList(
