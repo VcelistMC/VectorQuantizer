@@ -104,6 +104,17 @@ class ImageVector {
         _vectorData.set(row, rowData);
     }
 
+    public boolean equals(ImageVector that){
+        for (int row = 0; row < _size; row++){
+            for (int col = 0; col < _size; col++){
+                if (this.getPixel(row, col) != that.getPixel(row, col)){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public static void main(String[] args) {
         ImageVector vec = new ImageVector(2);
         vec.setPixel(1, 1, 231);

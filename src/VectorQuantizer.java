@@ -126,13 +126,19 @@ public class VectorQuantizer {
             HashMap<ImageVector, ArrayList<ImageVector>> tmpCodeBook = new HashMap<>();
             for(ImageVector imageVector : codeBook.keySet()){
                 ImageVector avgVector = vectorAverage1D(codeBook.get(imageVector));
-                
+                tmpCodeBook.put(avgVector, new ArrayList<>());
+            }
+            ArrayList<ImageVector> codeBookKeys = new ArrayList<>(codeBook.keySet());
+            ArrayList<ImageVector> tempCodeBookKeys = new ArrayList<>(tmpCodeBook.keySet());
+            for (int i = 0; i < codeBook.size(); i++){
+                ImageVector key1 = codeBookKeys.get(i);
+                ImageVector key2 = tempCodeBookKeys.get(i);
+                if (key1.equals(key2))
+                    vectorsChanged = false;
             }
         }
         return null;
     }
-
-
 
     public static void main(String[] args) {
         ArrayList<ArrayList<Integer>> data = new ArrayList<ArrayList<Integer>>(
