@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import javax.swing.plaf.basic.BasicComboBoxUI.ItemHandler;
+
 public class VectorQuantizer {
     private int _vectorSize;
     private int _codeBookSize;
@@ -98,14 +100,36 @@ public class VectorQuantizer {
         ImageVector averageVector = vectorAverage(_imageAsVectors);
         ArrayList<ImageVector> splittedVectors = averageVector.split();
         HashMap<ImageVector, ArrayList<ImageVector>> codeBook = new HashMap<>();
-        while (codeBook.size() < _codeBookSize){
+        codeBook.put(splittedVectors.get(0), new ArrayList<>());
+        codeBook.put(splittedVectors.get(1), new ArrayList<>());
+        
+        while (codeBook.size() != _codeBookSize){
             for (ArrayList<ImageVector> row : _imageAsVectors){
                 for (ImageVector imageVector : row){
                     ImageVector minimumKey = findMinimumDistance(imageVector, new ArrayList<>(codeBook.keySet()));
                     codeBook.get(minimumKey).add(imageVector);
                 }
             }
+            HashMap<ImageVector, ArrayList<ImageVector>> tmpCodeBook = new HashMap<>();
+
+            for(ImageVector imageVector : codeBook.keySet()){
+                ImageVector avgVector = vectorAverage1D(codeBook.get(imageVector));
+                ArrayList<ImageVector> tmpSplittedVectors = avgVector.split();
+                tmpCodeBook.put(tmpSplittedVectors.get(0), new ArrayList<>());
+                tmpCodeBook.put(tmpSplittedVectors.get(1), new ArrayList<>());
+            }
+            codeBook = tmpCodeBook;
         }
+
+        boolean vectorsChanged = true;
+        while(vectorsChanged){
+            HashMap<ImageVector, ArrayList<ImageVector>> tmpCodeBook = new HashMap<>();
+            for(ImageVector imageVector : codeBook.keySet()){
+                ImageVector avgVector = vectorAverage1D(codeBook.get(imageVector));
+                
+            }
+        }
+        return null;
     }
 
 
