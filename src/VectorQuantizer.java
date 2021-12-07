@@ -1,7 +1,6 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Vector;
+import java.util.HashMap;
 
 public class VectorQuantizer {
     private int _vectorSize;
@@ -58,7 +57,7 @@ public class VectorQuantizer {
         _convertImageDataToVectors(imageData);
     }
 
-    public ImageVector vectorAverage1D(ArrayList<ImageVector> imageVectors){
+    private ImageVector vectorAverage1D(ArrayList<ImageVector> imageVectors){
         ImageVector averageVector = new ImageVector(_vectorSize);
         for (int row = 0; row < _vectorSize; row++){
             for (int col = 0; col < _vectorSize; col++){
@@ -72,7 +71,7 @@ public class VectorQuantizer {
         return averageVector;
     }
 
-    public ImageVector vectorAverage(ArrayList<ArrayList<ImageVector>> imageVectors){
+    private ImageVector vectorAverage(ArrayList<ArrayList<ImageVector>> imageVectors){
         ArrayList<ImageVector> vectors = new ArrayList<>();
         for (int row = 0; row < imageVectors.size(); row++){
             for (int col = 0; col < imageVectors.size(); col++){
@@ -81,6 +80,35 @@ public class VectorQuantizer {
         }
         return vectorAverage1D(vectors);
     }
+
+    private ImageVector findMinimumDistance(ImageVector imageVector, ArrayList<ImageVector> keys){
+        double minimumDistance = imageVector.getEuclideanDistanceTo(keys.get(0));
+        int minimumDistanceIndex = 0;
+        for (int i = 1; i < keys.size(); i++){
+            double tempDistance = imageVector.getEuclideanDistanceTo(keys.get(i));
+            if (minimumDistance > tempDistance){
+                minimumDistance = tempDistance;
+                minimumDistanceIndex = i;
+            }
+        }
+        return keys.get(minimumDistanceIndex);
+    }
+
+    private ArrayList<ImageVector> generateCodeBook(){
+        ImageVector averageVector = vectorAverage(_imageAsVectors);
+        ArrayList<ImageVector> splittedVectors = averageVector.split();
+        HashMap<ImageVector, ArrayList<ImageVector>> codeBook = new HashMap<>();
+        while (codeBook.size() < _codeBookSize){
+            for (ArrayList<ImageVector> row : _imageAsVectors){
+                for (ImageVector imageVector : row){
+                    ImageVector minimumKey = findMinimumDistance(imageVector, new ArrayList<>(codeBook.keySet()));
+                    codeBook.get(minimumKey).add(imageVector);
+                }
+            }
+        }
+    }
+
+
 
     public static void main(String[] args) {
         ArrayList<ArrayList<Integer>> data = new ArrayList<ArrayList<Integer>>(
