@@ -59,7 +59,7 @@ public class VectorQuantizer {
         _convertImageDataToVectors(imageData);
     }
 
-    private ImageVector vectorAverage1D(ArrayList<ImageVector> imageVectors){
+    private ImageVector _vectorAverage1D(ArrayList<ImageVector> imageVectors){
         ImageVector averageVector = new ImageVector(_vectorSize);
         for (int row = 0; row < _vectorSize; row++){
             for (int col = 0; col < _vectorSize; col++){
@@ -73,17 +73,17 @@ public class VectorQuantizer {
         return averageVector;
     }
 
-    private ImageVector vectorAverage(ArrayList<ArrayList<ImageVector>> imageVectors){
+    private ImageVector _vectorAverage(ArrayList<ArrayList<ImageVector>> imageVectors){
         ArrayList<ImageVector> vectors = new ArrayList<>();
         for (int row = 0; row < imageVectors.size(); row++){
             for (int col = 0; col < imageVectors.size(); col++){
                 vectors.add(imageVectors.get(row).get(col));
             }
         }
-        return vectorAverage1D(vectors);
+        return _vectorAverage1D(vectors);
     }
 
-    private ImageVector findMinimumDistance(ImageVector imageVector, ArrayList<ImageVector> keys){
+    private ImageVector _findMinimumDistance(ImageVector imageVector, ArrayList<ImageVector> keys){
         double minimumDistance = imageVector.getEuclideanDistanceTo(keys.get(0));
         int minimumDistanceIndex = 0;
         for (int i = 1; i < keys.size(); i++){
@@ -96,24 +96,19 @@ public class VectorQuantizer {
         return keys.get(minimumDistanceIndex);
     }
 
-    private ArrayList<ImageVector> generateCodeBook(){
-        ImageVector averageVector = vectorAverage(_imageAsVectors);
+    private void _generateCodeBook(){
+        ImageVector averageVector = _vectorAverage(_imageAsVectors);
         ArrayList<ImageVector> splittedVectors = averageVector.split();
         HashMap<ImageVector, ArrayList<ImageVector>> codeBook = new HashMap<>();
         codeBook.put(splittedVectors.get(0), new ArrayList<>());
         codeBook.put(splittedVectors.get(1), new ArrayList<>());
         
         while (codeBook.size() != _codeBookSize){
-            for (ArrayList<ImageVector> row : _imageAsVectors){
-                for (ImageVector imageVector : row){
-                    ImageVector minimumKey = findMinimumDistance(imageVector, new ArrayList<>(codeBook.keySet()));
-                    codeBook.get(minimumKey).add(imageVector);
-                }
-            }
             HashMap<ImageVector, ArrayList<ImageVector>> tmpCodeBook = new HashMap<>();
+            _assignVectors(codeBook);
 
             for(ImageVector imageVector : codeBook.keySet()){
-                ImageVector avgVector = vectorAverage1D(codeBook.get(imageVector));
+                ImageVector avgVector = _vectorAverage1D(codeBook.get(imageVector));
                 ArrayList<ImageVector> tmpSplittedVectors = avgVector.split();
                 tmpCodeBook.put(tmpSplittedVectors.get(0), new ArrayList<>());
                 tmpCodeBook.put(tmpSplittedVectors.get(1), new ArrayList<>());
@@ -123,21 +118,40 @@ public class VectorQuantizer {
 
         boolean vectorsChanged = true;
         while(vectorsChanged){
+            _assignVectors(codeBook);
+
             HashMap<ImageVector, ArrayList<ImageVector>> tmpCodeBook = new HashMap<>();
             for(ImageVector imageVector : codeBook.keySet()){
-                ImageVector avgVector = vectorAverage1D(codeBook.get(imageVector));
+                ImageVector avgVector = _vectorAverage1D(codeBook.get(imageVector));
                 tmpCodeBook.put(avgVector, new ArrayList<>());
             }
+
             ArrayList<ImageVector> codeBookKeys = new ArrayList<>(codeBook.keySet());
             ArrayList<ImageVector> tempCodeBookKeys = new ArrayList<>(tmpCodeBook.keySet());
-            for (int i = 0; i < codeBook.size(); i++){
-                ImageVector key1 = codeBookKeys.get(i);
-                ImageVector key2 = tempCodeBookKeys.get(i);
-                if (key1.equals(key2))
-                    vectorsChanged = false;
+
+            vectorsChanged = _didVectorsChange(codeBookKeys, tempCodeBookKeys);
+            if(vectorsChanged)
+                codeBook = tmpCodeBook;
+        }
+    }
+
+    private boolean _didVectorsChange(ArrayList<ImageVector> oldKeys, ArrayList<ImageVector> newKeys){
+        for(int i = 0; i < oldKeys.size(); i++){
+            ImageVector key1 = oldKeys.get(i);
+            ImageVector key2 = newKeys.get(i);
+            if (!key1.equals(key2))
+                return true;
+        }
+        return false;
+    }
+
+    private void _assignVectors(HashMap<ImageVector, ArrayList<ImageVector>> codeBook){
+        for (ArrayList<ImageVector> row : _imageAsVectors){
+            for (ImageVector imageVector : row){
+                ImageVector minimumKey = _findMinimumDistance(imageVector, new ArrayList<>(codeBook.keySet()));
+                codeBook.get(minimumKey).add(imageVector);
             }
         }
-        return null;
     }
 
     public static void main(String[] args) {
