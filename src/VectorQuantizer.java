@@ -1,6 +1,5 @@
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -131,10 +130,14 @@ public class VectorQuantizer {
                 decompressedImageData.add(newRow);
             }   
         }
+       _writeImage(decompressedImageData);
+    }
+
+    private void _writeImage(ArrayList<ArrayList<Integer>> data){
         BufferedImage image = new BufferedImage(_width, _length, BufferedImage.TYPE_INT_RGB);
         for(int i = 0; i < _width; i++){
             for(int j = 0; j < _length; j++){
-                int pixel = decompressedImageData.get(i).get(j);
+                int pixel = data.get(i).get(j);
                 pixel = pixel + (pixel << 8 ) + (pixel << 16);
                 image.setRGB(i, j, pixel);
             }
@@ -205,7 +208,7 @@ public class VectorQuantizer {
     private ImageVector _vectorAverage(ArrayList<ArrayList<ImageVector>> imageVectors){
         ArrayList<ImageVector> vectors = new ArrayList<>();
         for (int row = 0; row < imageVectors.size(); row++){
-            for (int col = 0; col < imageVectors.size(); col++){
+            for (int col = 0; col < imageVectors.get(row).size(); col++){
                 vectors.add(imageVectors.get(row).get(col));
             }
         }
@@ -245,7 +248,7 @@ public class VectorQuantizer {
         }
 
         boolean vectorsChanged = true;
-        int loopLimit = 500;
+        int loopLimit = 0;
         while(vectorsChanged && loopLimit > 0){
             _assignVectors(_codeBook);
 
@@ -320,6 +323,7 @@ public class VectorQuantizer {
         // }
         // vectorQuantizer._generateCodeBook();
         // vectorQuantizer.decompress();
-        vectorQuantizer.compress("before.png");
+        vectorQuantizer.compress("C:\\Users\\Peter\\Desktop\\Desktop\\bg.png");
+        // vectorQuantizer.compress("before.png");
     }
 }
