@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-
 import javax.imageio.ImageIO;
 
 public class VectorQuantizer {
@@ -128,9 +127,9 @@ public class VectorQuantizer {
                     }
                 }
                 decompressedImageData.add(newRow);
-            }   
+            }
         }
-       _writeImage(decompressedImageData);
+        _writeImage(decompressedImageData);
     }
 
     private void _writeImage(ArrayList<ArrayList<Integer>> data){
@@ -150,17 +149,10 @@ public class VectorQuantizer {
         }
     }
 
-    private ImageVector _getKeyFromValue(ImageVector value, HashMap<ImageVector, ArrayList<ImageVector>> hashMap){
-        for(ImageVector key: hashMap.keySet()){
-            if(hashMap.get(key).contains(value))
-                return key;
-        }
-        return null;
-    }
-
     private ImageVector _getKeyFromValue(String value, HashMap<ImageVector, String> hashMap){
         for(ImageVector key: hashMap.keySet()){
-            if(hashMap.get(key).equals(value));
+            String stringKey = hashMap.get(key);
+            if(stringKey.equals(value))
                 return key;
         }
         return null;
@@ -178,7 +170,7 @@ public class VectorQuantizer {
         _length = img.getHeight();
         ArrayList<ArrayList<Integer>> imgArr = new ArrayList<>();
         Raster raster = img.getData();
-        
+
         for (int i = 0; i < _width; i++) {
             imgArr.add(new ArrayList<>());
             for (int j = 0; j < _length; j++) {
@@ -233,7 +225,7 @@ public class VectorQuantizer {
         ArrayList<ImageVector> splittedVectors = averageVector.split();
         _codeBook.put(splittedVectors.get(0), new ArrayList<>());
         _codeBook.put(splittedVectors.get(1), new ArrayList<>());
-        
+
         while (_codeBook.size() != _codeBookSize){
             HashMap<ImageVector, ArrayList<ImageVector>> tmpCodeBook = new HashMap<>();
             _assignVectors(_codeBook);
@@ -248,7 +240,7 @@ public class VectorQuantizer {
         }
 
         boolean vectorsChanged = true;
-        int loopLimit = 0;
+        int loopLimit = 100;
         while(vectorsChanged && loopLimit > 0){
             _assignVectors(_codeBook);
 
@@ -267,7 +259,8 @@ public class VectorQuantizer {
             loopLimit--;
             System.out.println("loops:" + loopLimit);
         }
-        _assignVectors(_codeBook);
+        if(vectorsChanged)
+            _assignVectors(_codeBook);
     }
 
     private boolean _didVectorsChange(ArrayList<ImageVector> oldKeys, ArrayList<ImageVector> newKeys){
@@ -291,29 +284,29 @@ public class VectorQuantizer {
 
     public static void main(String[] args) {
         ArrayList<ArrayList<Integer>> data = new ArrayList<ArrayList<Integer>>(
-            Arrays.asList(
-                new ArrayList<Integer>(
-                    Arrays.asList(1, 2, 7, 9, 4, 11)
-                ),
-                new ArrayList<Integer>(
-                    Arrays.asList(3, 4, 6, 6, 12, 12)
-                ),
-                new ArrayList<Integer>(
-                    Arrays.asList(4, 9, 15, 14, 9, 9)
-                ),
-                new ArrayList<Integer>(
-                    Arrays.asList(10, 10, 20, 18, 8, 8)
-                ),
-                new ArrayList<Integer>(
-                    Arrays.asList(4, 3, 17, 16, 1, 4)
-                ),
-                new ArrayList<Integer>(
-                    Arrays.asList(4, 5, 18, 18, 5, 6)
+                Arrays.asList(
+                        new ArrayList<Integer>(
+                                Arrays.asList(1, 2, 7, 9, 4, 11)
+                        ),
+                        new ArrayList<Integer>(
+                                Arrays.asList(3, 4, 6, 6, 12, 12)
+                        ),
+                        new ArrayList<Integer>(
+                                Arrays.asList(4, 9, 15, 14, 9, 9)
+                        ),
+                        new ArrayList<Integer>(
+                                Arrays.asList(10, 10, 20, 18, 8, 8)
+                        ),
+                        new ArrayList<Integer>(
+                                Arrays.asList(4, 3, 17, 16, 1, 4)
+                        ),
+                        new ArrayList<Integer>(
+                                Arrays.asList(4, 5, 18, 18, 5, 6)
+                        )
                 )
-            )
         );
 
-        VectorQuantizer vectorQuantizer = new VectorQuantizer(4, 32);
+        VectorQuantizer vectorQuantizer = new VectorQuantizer(2, 32);
         // vectorQuantizer._ImageDataToVectors(data);
         // for(ArrayList<ImageVector> row: vectorQuantizer._imageAsVectors){
         //     for(ImageVector vector: row){
@@ -321,9 +314,7 @@ public class VectorQuantizer {
         //         System.out.println();
         //     }
         // }
-        // vectorQuantizer._generateCodeBook();
-        // vectorQuantizer.decompress();
-        vectorQuantizer.compress("C:\\Users\\Peter\\Desktop\\Desktop\\bg.png");
-        // vectorQuantizer.compress("before.png");
+        // vectorQuantizer.compress("C:\\Users\\Peter\\Desktop\\Desktop\\bg.png");
+        vectorQuantizer.compress("before.png");
     }
 }
