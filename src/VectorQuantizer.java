@@ -85,12 +85,13 @@ public class VectorQuantizer {
 
     private void _assignCodes(){
         int i = 0;
-        for(ImageVector vector: _codeBook.keySet()){
+        for(ImageVector keyVector: _codeBook.keySet()){
             String bin = Integer.toBinaryString(i);
-            for(ImageVector vector1: _codeBook.get(vector)){
-                vector1.setBinaryCode(bin);
+            ArrayList<ImageVector> children = _codeBook.get(keyVector);
+            for(ImageVector child: children){
+                child.setBinaryCode(bin);
             }
-            _binaryCodeBook.put(vector, bin);
+            _binaryCodeBook.put(keyVector, bin);
             i++;
         }
     }
@@ -263,6 +264,7 @@ public class VectorQuantizer {
             loopLimit--;
             System.out.println("loops:" + loopLimit);
         }
+        _assignVectors(_codeBook);
     }
 
     private boolean _didVectorsChange(ArrayList<ImageVector> oldKeys, ArrayList<ImageVector> newKeys){
