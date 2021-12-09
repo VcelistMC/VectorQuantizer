@@ -3,10 +3,11 @@ import java.util.ArrayList;
 class ImageVector {
     private ArrayList<ArrayList<Integer>> _vectorData;
     private int _size;
+    private String _binaryCode; 
     
     // for the purposes of adding pixels incrementally
-    private int currRow = 0;
-    private int currCol = 0;
+    private int _currRow = 0;
+    private int _currCol = 0;
 
     public ImageVector(int size){
         _size = size;
@@ -24,20 +25,59 @@ class ImageVector {
         _vectorData = vectorData;
     }
 
+    public void setBinaryCode(String code){
+        _binaryCode = code;
+    }
+
+    @Override
+    public String toString() {
+        String out = "";
+        for(ArrayList<Integer> row: _vectorData){
+            for(int pixel : row){
+                out += (pixel + " ");
+            }
+            out += "|";
+        }
+        return out;
+    }
+
+    public int getPixelInc(){
+        _currCol = 0;
+        _currRow = 0;
+        if(_currCol == _size){
+            _currCol = 0;
+            _currRow++;
+        }
+        if(_currRow == _size){
+            return 0;
+        }
+        return getPixel(_currRow, _currCol);
+    }
+
+
+    public void printVector(){
+        for(ArrayList<Integer> row : _vectorData){
+            for(Integer pixel: row){
+                System.out.print(pixel + " ");
+            }
+            System.out.println();
+        }
+    }
+
     /**
      * adds a pixel to a vector incrementally,
      * automatically going down one row when we reach column bound
      */
     public void add(int pixel){
-        if(currRow == _size){
+        if(_currCol == _size){
+            _currCol = 0;
+            _currRow++;
+        }
+        if(_currRow == _size){
             return;
         }
-        else if(currCol == _size){
-            currCol = 0;
-            currRow++;
-        }
-        setPixel(currRow, currCol, pixel);
-        currCol++;
+        setPixel(_currRow, _currCol, pixel);
+        _currCol++;
 
     }
 
@@ -48,18 +88,19 @@ class ImageVector {
         int currCol = 0, currRow = 0;
         
         while (true) {
-            if(currRow == this._size){
-                break;
-            }
-            else if(currCol == this._size){
+            if(currCol == this._size){
                 currCol = 0;
                 currRow++;
+            }
+            if(currRow == this._size){
+                break;
             }
             
             int currPixel = getPixel(currRow, currCol);
 
-            vec1.add(currPixel);
+            vec1.add(currPixel - 1);
             vec2.add(currPixel + 1);
+            currCol++;
             
         }
         splittedVectors.add(vec1);
@@ -74,12 +115,12 @@ class ImageVector {
         double sum = 0;
 
         while(true){
-            if(currRow == _size){
-                break;
-            }
-            else if(currCol == _size){
+            if(currCol == _size){
                 currCol = 0;
                 currRow++;
+            }
+            if(currRow == _size){
+                break;
             }
             int firstPixel = this.getPixel(currRow, currCol);
             int secondPixel = that.getPixel(currRow, currCol);
@@ -118,5 +159,9 @@ class ImageVector {
     public static void main(String[] args) {
         ImageVector vec = new ImageVector(2);
         vec.setPixel(1, 1, 231);
+    }
+
+    public String getBinaryCode() {
+        return _binaryCode;
     }
 }
