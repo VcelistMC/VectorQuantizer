@@ -17,19 +17,32 @@ public class VectorQuantizer {
     private int _length;
     private HashMap<ImageVector, String> _binaryCodeBook;
     private ArrayList<ArrayList<String>> _imageAsBinCodes;
+    private ArrayList<ArrayList<ImageVector>> _decompressedImageVectors;
+    private ArrayList<ArrayList<Integer>> _decompressedImageData;
 
-    VectorQuantizer(int vectorSize, int codeBookSize){
-        _vectorSize = vectorSize;
-        _codeBookSize = codeBookSize;
+    VectorQuantizer(){
         _imageAsVectors = new ArrayList<>();
         _imageData = new ArrayList<>();
         _codeBook = new HashMap<>();
         _binaryCodeBook = new HashMap<>();
         _imageAsBinCodes = new ArrayList<>();
-
+        _decompressedImageVectors = new ArrayList<>();
+        _decompressedImageData = new ArrayList<>();
     }
 
-    private void _ImageDataToVectors(ArrayList<ArrayList<Integer>> imageData){
+    private void _clear(){
+        _imageAsVectors.clear();
+        _imageData.clear();
+        _codeBook.clear();
+        _binaryCodeBook.clear();
+        _imageAsBinCodes.clear();
+        _decompressedImageVectors.clear();
+        _decompressedImageData.clear();
+        _width = 0;
+        _length = 0;
+    }
+
+    private void _ImageDataToVectors(){
         for(int row = 0; row < _width; row += _vectorSize){
             ArrayList<ImageVector> currVectorsRow = new ArrayList<>();
 
@@ -47,7 +60,7 @@ public class VectorQuantizer {
                             currRow.add(0);
                     }
                     else
-                        currRow = imageData.get(currRowIndex);
+                        currRow = _imageData.get(currRowIndex);
 
                     while(currColIndex < col + _vectorSize){
                         int pixelValue = 0;
@@ -66,18 +79,26 @@ public class VectorQuantizer {
         }
     }
 
-    public void compress(String path){
+    public void compress(String path, int vectorSize, int codeBookSize){
+        _clear();
+        _vectorSize = vectorSize;
+        _codeBookSize = codeBookSize;
         System.out.println("Converting to 2d array");
         _imageToImageData(path);
+
         System.out.println("Converting to vectors");
-        _ImageDataToVectors(_imageData);
+        _ImageDataToVectors();
+        
         System.out.println("Generating codebook");
         _generateCodeBook();
+        
         System.out.println("assigning codees to codebook");
         _assignCodes();
+        
         System.out.println("Encoding");
         _encode();
-        System.out.println("decoding");
+        
+        System.out.println("Decoding");
         decompress();
     }
 
@@ -106,19 +127,22 @@ public class VectorQuantizer {
 
 
 
-    private void decompress() {
-        // int rowInt = 0; int colInt = 0;
-        ArrayList<ArrayList<ImageVector>> decompressedImageVectors = new ArrayList<>();
+    public void decompress() {
         for(ArrayList<String> row: _imageAsBinCodes){
             ArrayList<ImageVector> newRow = new ArrayList<>();
             for(String key: row){
                 newRow.add(_getKeyFromValue(key, _binaryCodeBook));
             }
-            decompressedImageVectors.add(newRow);
+            _decompressedImageVectors.add(newRow);
         }
 
+        _decompressedImageData = _vectorsToImageData();
+        _writeImage(_decompressedImageData);
+    }
+
+    private ArrayList<ArrayList<Integer>> _vectorsToImageData() {
         ArrayList<ArrayList<Integer>> decompressedImageData = new ArrayList<>();
-        for(ArrayList<ImageVector> row: decompressedImageVectors){
+        for(ArrayList<ImageVector> row: _decompressedImageVectors){
             for(int rowInt = 0; rowInt < _vectorSize; rowInt++){
                 ArrayList<Integer> newRow = new ArrayList<>();
                 for(ImageVector vector: row){
@@ -129,7 +153,7 @@ public class VectorQuantizer {
                 decompressedImageData.add(newRow);
             }
         }
-        _writeImage(decompressedImageData);
+        return decompressedImageData;
     }
 
     private void _writeImage(ArrayList<ArrayList<Integer>> data){
@@ -257,7 +281,7 @@ public class VectorQuantizer {
             if(vectorsChanged)
                 _codeBook = tmpCodeBook;
             loopLimit--;
-            System.out.println("loops:" + loopLimit);
+            // System.out.println("loops:" + loopLimit);
         }
         if(vectorsChanged)
             _assignVectors(_codeBook);
@@ -306,7 +330,7 @@ public class VectorQuantizer {
                 )
         );
 
-        VectorQuantizer vectorQuantizer = new VectorQuantizer(2, 32);
+        VectorQuantizer vectorQuantizer = new VectorQuantizer();
         // vectorQuantizer._ImageDataToVectors(data);
         // for(ArrayList<ImageVector> row: vectorQuantizer._imageAsVectors){
         //     for(ImageVector vector: row){
@@ -315,6 +339,6 @@ public class VectorQuantizer {
         //     }
         // }
         // vectorQuantizer.compress("C:\\Users\\Peter\\Desktop\\Desktop\\bg.png");
-        vectorQuantizer.compress("before.png");
+        vectorQuantizer.compress("output.png", 2, 32);
     }
 }
